@@ -63,11 +63,13 @@ exports.testCmd = (rl,id) => {
             const quiz = model.getByIndex(id);
             rl.question( quiz.question+"? ", answer => {
                 if ( answer.trim().toLowerCase() === quiz.answer.trim().toLowerCase()) {
-                    biglog('CORRECTO','green');
+                    log('Su respuesta es correcta.');
+                    biglog('Correcta','green');
                     rl.prompt();
                 }
                 else {
-                    biglog('INCORRECTO','red');
+                    log('Su respuesta es incorrecta.');
+                    biglog('Incorrecta','red');
                     rl.prompt();
                 }
             })
