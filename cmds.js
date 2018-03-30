@@ -81,9 +81,9 @@ exports.showCmd = (socket, rl, id) => {
         });
 };
 
-const makeQuestion = (rl, text) => {
+const makeQuestion = ( rl, text) => {
     return new Sequelize.Promise((resolve, reject) => {
-        rl.question(colorize(text, 'red'), answer => {
+        rl.question( colorize(text, 'red'), answer => {
             resolve(answer.trim());
         })
     })
@@ -152,7 +152,7 @@ exports.testCmd = (socket, rl, id) => {
 
 }
 
-const playOne = (rl, score, quizzes) => {
+const playOne = (socket, rl, score, quizzes) => {
 
     if (quizzes.length === 0) {
         log(socket, 'No hay nada más que preguntar.');
@@ -176,7 +176,7 @@ const playOne = (rl, score, quizzes) => {
                         score++;
                         log(socket, `CORRECTO - Lleva ${score} aciertos.`);
 
-                        playOne(rl, score, quizzes);
+                        playOne(socket, rl, score, quizzes);
 
                     }
                     else {
@@ -190,7 +190,7 @@ const playOne = (rl, score, quizzes) => {
 
             }
             else {
-                playOne(rl, score, quizzes);
+                playOne(socket, rl, score, quizzes);
             }
         })
 
@@ -213,7 +213,7 @@ exports.playCmd = (socket, rl) => {
                 rl.prompt();
             }
             else {
-                playOne(rl, score, quizzes)
+                playOne(socket, rl, score, quizzes)
             }
         })
 
@@ -233,6 +233,7 @@ exports.deleteCmd = (socket, rl, id) => {
 };
 
 exports.editCmd = (socket, rl, id) => {
+
     validateId(id)
         .then(id => models.quiz.findById(id))
         .then(quiz => {
@@ -243,12 +244,12 @@ exports.editCmd = (socket, rl, id) => {
             process.stdout.isTTY && setTimeout(() => {
                 rl.write(quiz.question)
             }, 0);
-            return makeQuestion(rl, 'Introduzca la pregunta: ')
+            return makeQuestion( rl, 'Introduzca la pregunta: ')
                 .then(q => {
                     process.stdout.isTTY && setTimeout(() => {
                         rl.write(quiz.answer)
                     }, 0);
-                    return makeQuestion(rl, ' Introduzca la respuesta: ')
+                    return makeQuestion( rl, ' Introduzca la respuesta: ')
                         .then(a => {
                             quiz.question = q;
                             quiz.answer = a;
@@ -261,14 +262,14 @@ exports.editCmd = (socket, rl, id) => {
             return quiz.save();
         })
         .then(quiz => {
-            log(` Se ha cambiado el quiz ${colorize(quiz.id, 'magenta')} por: ${quiz.question} ${colorize('=>', 'magenta')} ${quiz.answer}`)
+            log(socket, ` Se ha cambiado el quiz ${colorize(quiz.id, 'magenta')} por: ${quiz.question} ${colorize('=>', 'magenta')} ${quiz.answer}`)
         })
         .catch(Sequelize.ValidationError, error => {
-            errorlog('El quiz es erroneo: ');
+            errorlog(socket, 'El quiz es erroneo: ');
             error.errors.forEach(message => errorlog(message));
         })
         .catch(error => {
-            errorlog(error.message);
+            errorlog(socket, error.message);
         })
         .then(() => {
             rl.prompt();
@@ -278,8 +279,8 @@ exports.editCmd = (socket, rl, id) => {
 };
 
 exports.creditsCmd = (socket, rl) => {
-    log('Autora de la pŕatica:');
-    log('Julia Gómez Pozo', 'green');
+    log(socket, 'Autora de la pŕatica:');
+    log(socket, 'Julia Gómez Pozo', 'green');
     rl.prompt();
 };
 
